@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:the_architecture/core/data/repository/impl/user_repository_Impl.dart';
@@ -16,11 +17,13 @@ class UserListView extends ConsumerWidget {
   void navigateToCreateUserView(BuildContext context) => Navigator.push(
       context, MaterialPageRoute(builder: (context) => const CreateUserView()));
   void navigateToUserDetailsView(BuildContext context) => Navigator.push(
-      context, MaterialPageRoute(builder: (context) => const UserDetailsView()));
+      context,
+      MaterialPageRoute(builder: (context) => const UserDetailsView()));
   @override
   Widget build(BuildContext context, ref) {
-    final users = ref.watch(userRepositoryProvider).getAllUsers();
+    final users = ref.watch(userRepositoryProvider);
     final user = ref.watch(userProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("CRUD"),
@@ -70,6 +73,10 @@ class UserListView extends ConsumerWidget {
                   },
                 );
               }),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => navigateToCreateUserView(context),
+        child: Icon(CupertinoIcons.pen),
+      ),
     );
   }
 }

@@ -5,30 +5,44 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:the_architecture/core/data/model/user_model.dart';
 import 'package:the_architecture/core/data/repository/impl/user_repository_Impl.dart';
 
+import '../../utils/validators.dart';
+import '../widgets/custom_text_form_field.dart';
+
 class CreateUserView extends HookConsumerWidget {
   const CreateUserView({Key? key}) : super(key: key);
 
+  void createUser(
+      String name, String email, WidgetRef ref, BuildContext context) {
+    final newUser = UserModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        username: name,
+        email: email);
+    ref.read(userRepositoryProvider.notifier).createUser(newUser);
+
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context, ref) {
-    final user = ref.read(userRepositoryProvider);
-
     final usernameEditingController = useTextEditingController();
     final emailEditingController = useTextEditingController();
+
+    final formKey = GlobalKey<FormState>();
 
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text("Create User"),
+        title: const Text("Create User"),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: SingleChildScrollView(
           child: Form(
-            // key: controller.formKey,
+            key: formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
               children: [
-                const Icon(Icons.flag),
+                const Icon(CupertinoIcons.alt),
                 const SizedBox(
                   height: 20,
                 ),
@@ -36,32 +50,22 @@ class CreateUserView extends HookConsumerWidget {
                 const SizedBox(
                   height: 20,
                 ),
-                TextFormField(
-                  keyboardType: TextInputType.name,
+                CustomTextFormField(
                   controller: usernameEditingController,
-                  // validator: (val) => validateName(val!),
-                  decoration: InputDecoration(
-                    labelText: "username",
-                    prefixIcon: const Icon(CupertinoIcons.person),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  labelText: "username",
+                  prefixIcon: CupertinoIcons.person,
+                  keyboardType: TextInputType.name,
+                  validator: validateName,
                 ),
                 const SizedBox(
                   height: 16,
                 ),
-                TextFormField(
-                  keyboardType: TextInputType.emailAddress,
+                CustomTextFormField(
                   controller: emailEditingController,
-                  // validator: (val) => validateDepartment(val!),
-                  decoration: InputDecoration(
-                    labelText: "e-mail",
-                    prefixIcon: const Icon(CupertinoIcons.device_desktop),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  labelText: "e-mail",
+                  prefixIcon: CupertinoIcons.mail,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: validateEmail,
                 ),
                 const SizedBox(
                   height: 16,
@@ -75,16 +79,10 @@ class CreateUserView extends HookConsumerWidget {
                           borderRadius: BorderRadius.circular(12.0),
                         ),
                       ),
-                      onPressed: () {
-                        final newUser = UserModel(
-                            id: DateTime.now()
-                                .millisecondsSinceEpoch
-                                .toString(),
-                            username: usernameEditingController.text,
-                            email: emailEditingController.text);
-                        user.createUser(newUser);
-                        Navigator.pop(context);
-                      },
+                      onPressed: () => formKey.currentState!.validate()
+                          ? createUser(usernameEditingController.text,
+                              emailEditingController.text, ref, context)
+                          : null,
                       child: const Text("Create")),
                 ),
               ],
